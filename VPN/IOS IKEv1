@@ -1,1 +1,23 @@
 crypto isakmp key C1sc0123 0.0.0.0
+! PTM
+ip access-list extended VPNACL
+  permit ip 192.168.1.0 0.0.0.255 192.168.2.0 0.0.0.255
+!
+crypto isakmp policy 10
+  hash sha256
+  authentication pre-share
+  group 19
+  lifetime 86400
+  encryption aes 256
+!
+crypto ipsec transform-set TSET esp-aes 256 esp-sha256-hamc
+  mode tunnel
+!
+crypto map VPNMAP 10 ipsec-isakmp
+  match address VPNACL
+  set peer 10.1.1.2
+  set transform-set TSET
+  reverse-route static
+!
+int gi 2
+  crypto map VPNMAP
